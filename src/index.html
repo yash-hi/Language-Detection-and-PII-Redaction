@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Review Analyser — graded by AI</title>
+<title>Language Detection & PII Redaction — graded by AI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Caveat:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -280,27 +280,27 @@
 
   <header class="board">
     <div class="board-inner">
-      <p class="eyebrow">Azure AI Language · Text Analytics demo</p>
-      <h1 class="typewriter-title">Review Analyser</h1>
-      <p class="chalk-note">paste a review &mdash; get it graded in real time</p>
+      <p class="eyebrow">Azure AI Language Service</p>
+      <h1 class="typewriter-title">Language Detection & PII Redaction</h1>
+      <p class="chalk-note">Enter text and analyze it using Azure AI Language</p>
 
-      <ol class="steps">
-        <li><span class="chalk-num">1</span> Paste any review, tweet, or comment</li>
-        <li><span class="chalk-num">2</span> We send it to Azure AI Language</li>
-        <li><span class="chalk-num">3</span> Your copy comes back marked up &amp; stamped</li>
-      </ol>
+    <ol class="steps">
+      <li><span class="chalk-num">1</span> Paste any text</li>
+      <li><span class="chalk-num">2</span> Azure AI Language detects the language</li>
+       <li><span class="chalk-num">3</span> PII is detected and redacted automatically</li>
+   </ol>
     </div>
   </header>
 
   <main class="desk">
     <section class="sheet input-sheet">
-      <label for="reviewInput" class="sheet-label">Paste the review</label>
-      <textarea id="reviewInput" rows="8" placeholder="e.g. &ldquo;The battery life is incredible but the camera app crashes constantly. Customer support at Acme was friendly though.&rdquo;"></textarea>
+     <label for="reviewInput" class="sheet-label">Enter Text</label>
+      <textarea id="reviewInput" rows="8" placeholder="e.g. My name is Yash. My email is yash@gmail.com and my phone number is 9876543210."></textarea>
 
       <div class="sheet-footer">
         <span id="charCount" class="mono small">0 characters</span>
         <button id="analyzeBtn" class="stamp-button">
-          <span class="btn-label">Grade this review</span>
+          <span class="btn-label">Analyze Text</span>
         </button>
       </div>
       <p id="errorMsg" class="error-msg" hidden></p>
@@ -404,31 +404,31 @@
   }
 
   function renderResults(originalText, data) {
-    const { sentiment, confidenceScores, keyPhrases, entities } = data;
 
-    stampBadge.textContent = sentiment.toUpperCase();
-    stampBadge.className = 'stamp ' + sentiment.toLowerCase();
+  stampBadge.textContent = data.language;
+  stampBadge.className = "stamp";
 
-    const pos = Math.round((confidenceScores.positive || 0) * 100);
-    const neu = Math.round((confidenceScores.neutral || 0) * 100);
-    const neg = Math.round((confidenceScores.negative || 0) * 100);
-    barPos.style.width = pos + '%';
-    barNeu.style.width = neu + '%';
-    barNeg.style.width = neg + '%';
+  // Hide confidence bars (not used anymore)
+  barPos.style.width = "0%";
+  barNeu.style.width = "0%";
+  barNeg.style.width = "0%";
 
-    markedText.innerHTML = highlightPhrases(originalText, keyPhrases || []);
+  markedText.innerHTML =
+      "<b>Detected Language:</b> " + data.language +
+      "<br><br><b>Redacted Text:</b><br>" +
+      escapeHtml(data.piiRedactedText);
 
-    if (entities && entities.length) {
-      entityList.innerHTML = entities
-        .map(e => `<span class="entity-chip">${escapeHtml(e.text)}<span class="cat">${escapeHtml(e.category)}</span></span>`)
-        .join('');
-    } else {
-      entityList.innerHTML = '<span class="entity-empty">no named entities found</span>';
-    }
-
-    resultsSheet.hidden = false;
-    resultsSheet.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (data.piiEntities && data.piiEntities.length) {
+      entityList.innerHTML = data.piiEntities.map(e =>
+          `<span class="entity-chip">${escapeHtml(e.text)}
+          <span class="cat">${escapeHtml(e.category)}</span></span>`
+      ).join("");
+  } else {
+      entityList.innerHTML = "No PII entities found.";
   }
+
+  resultsSheet.hidden = false;
+}
 
   function highlightPhrases(text, phrases) {
     if (!phrases.length) return escapeHtml(text);
