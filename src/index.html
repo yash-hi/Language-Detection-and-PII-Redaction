@@ -310,7 +310,7 @@
       <div class="margin-rail">
         <div id="stampBadge" class="stamp" aria-hidden="true">PENDING</div>
         <div class="confidence-block">
-          <p class="mono small label">confidence</p>
+          <p class="mono small label">Analysis</p>
           <div class="bars">
             <div class="bar-row"><span class="mono tiny">pos</span><span class="bar"><span id="barPos" class="bar-fill pos"></span></span></div>
             <div class="bar-row"><span class="mono tiny">neu</span><span class="bar"><span id="barNeu" class="bar-fill neu"></span></span></div>
@@ -320,21 +320,23 @@
       </div>
 
       <div class="page-body">
-        <p class="sheet-label">marked-up copy</p>
+        <p class="sheet-label">Analysis Result</p>
         <p id="markedText" class="marked-text"></p>
 
         <div class="entities-block">
-          <p class="sheet-label">named entities</p>
+          <p class="sheet-label">PII Entities</p>
           <div id="entityList" class="entity-list mono small"></div>
         </div>
       </div>
     </section>
 
-    <p id="loadingMsg" class="loading-msg mono small" hidden>marking up your copy…</p>
+    <p id="loadingMsg" class="loading-msg mono small" hidden>
+    Analyzing text...
+</p>
   </main>
 
   <footer class="foot">
-    <p class="mono tiny">Built on Azure AI Language &middot; sentiment, key phrases &amp; entities &middot; Python backend on Azure</p>
+    <p class="mono tiny">Built on Azure AI Language &middot; Language Detection & PII Redaction &amp; entities &middot; Python backend on Azure</p>
   </footer>
 
 <script>
@@ -360,7 +362,7 @@
     errorMsg.hidden = true;
 
     if (!text) {
-      errorMsg.textContent = 'Paste a review first — there is nothing to grade yet.';
+      errorMsg.textContent = 'Please enter some text first.';
       errorMsg.hidden = false;
       return;
     }
@@ -387,7 +389,7 @@
       const data = await res.json();
       renderResults(text, data);
     } catch (err) {
-      errorMsg.textContent = `Could not grade this review: ${err.message}`;
+      errorMsg.textContent = `Analysis failed: ${err.message}`;
       errorMsg.hidden = false;
       resultsSheet.hidden = true;
     } finally {
@@ -399,9 +401,9 @@
     analyzeBtn.disabled = isLoading;
     loadingMsg.hidden = !isLoading;
     analyzeBtn.querySelector('.btn-label').textContent = isLoading
-      ? 'Grading…'
-      : 'Grade this review';
-  }
+      ? 'Analyzing...'
+      : 'Analyze Text';
+}
 
   function renderResults(originalText, data) {
 
