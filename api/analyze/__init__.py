@@ -69,7 +69,7 @@ def _call_language(kind: str, text: str) -> dict:
     payload = {
         "kind": kind,
         "parameters": {"modelVersion": "latest"},
-        "analysisInput": {"documents": [{"id": "1", "language": "en", "text": text}]},
+        "analysisInput": {"documents": [{"id": "1", "text": text}]},
     }
     data = json.dumps(payload).encode("utf-8")
     request = urllib.request.Request(
